@@ -17,13 +17,13 @@ function getCapabilities(wmtsUrl) {
     })
 }
 
-function getWSG84MatrixSetDefinitions(layer) {
-  const WGS84Set = _.find(layer.TileMatrixSetLink, t => (t.TileMatrixSet[0] || '').startsWith('WGS84'))
-  if (!WGS84Set) {
-    console.info(`No WSG84 tileset?`)
+function getMatrixSetDefinitions(layer, projection) {
+  const projectionSet = _.find(layer.TileMatrixSetLink, t => (t.TileMatrixSet[0] || '').startsWith(projection))
+  if (!projectionSet) {
+    console.info(`No ${projection} tileset?`)
     return null
   }
-  const tileSets = _.map(WGS84Set.TileMatrixSetLimits[0].TileMatrixLimits, t => {
+  const tileSets = _.map(projectionSet.TileMatrixSetLimits[0].TileMatrixLimits, t => {
     const id = _.first(t.TileMatrix)
     const zoom = parseInt(_.last((_.first(t.TileMatrix) || '').split(':')))
     if (!id || !_.isFinite(zoom)) {
@@ -52,7 +52,7 @@ function getWSG84MatrixSetDefinitions(layer) {
     }
   })
   return {
-    id: WGS84Set.TileMatrixSet[0],
+    id: projectionSet.TileMatrixSet[0],
     tileSets
   }
 }
@@ -67,7 +67,8 @@ function getLayerDefinitionsFromWMTSCapabilities(xmlAsJson) {
       title: _.first(l['ows:Title']),
       id: _.first(l['ows:Identifier']),
       format: _.first(l.Format),
-      wsg84: getWSG84MatrixSetDefinitions(l)
+      wsg84: getMatrixSetDefinitions(l, 'WGS84'),
+      epsg3395: getMatrixSetDefinitions(l, 'EPSG:3395_FTA')
     }
   })
   return layerDefinitions
