@@ -16,8 +16,16 @@
     [-20037508.342789244, -20037508.342789244, 20037508.342789244, 20037508.342789244]
   );
 
-  //var projection = ol.proj.get('EPSG:3395');
-  var projection = ol.proj.get('EPSG:4326');
+  var useWGS84 = false
+  var projection, tileMatrixSet
+  if (useWGS84) {
+    tileMatrixSet = 'EPSG:3395_FTA'
+    projection = ol.proj.get('EPSG:3395');
+  } else {
+    projection = ol.proj.get('EPSG:4326');
+    tileMatrixSet = 'WGS84_Pseudo-Mercator'
+  }
+
   var projectionExtent = projection.getExtent();
   var size = ol.extent.getWidth(projectionExtent) / 256;
   var resolutions = new Array(18);
@@ -25,8 +33,8 @@
   for (var z = 0; z < 18; ++z) {
     // generate resolutions and matrixIds arrays for this WMTS
     resolutions[z] = size / Math.pow(2, z);
-    //matrixIds[z] = 'EPSG:3395_FTA:'+z;
-    matrixIds[z] = 'WGS84_Pseudo-Mercator:'+z;
+    matrixIds[z] = tileMatrixSet +':'+z;
+    //matrixIds[z] = 'WGS84_Pseudo-Mercator:'+z;
   }
 
   var map = new ol.Map({
@@ -41,7 +49,7 @@
           url: 'https://julkinen.liikennevirasto.fi/rasteripalvelu/service/wmts',
           //layer: 'liikennevirasto:Merikarttasarjojen erikoiskartat public',
           layer: 'liikennevirasto:Rannikkokartat public',
-          matrixSet: 'WGS84_Pseudo-Mercator',
+          matrixSet: tileMatrixSet,
           format: 'image/png',
           projection: projection,
           tileGrid: new ol.tilegrid.WMTS({
