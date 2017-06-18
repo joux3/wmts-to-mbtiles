@@ -13,21 +13,25 @@
 <script>
   proj4.defs("EPSG:3395", "+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs");
   ol.proj.get('EPSG:3395').setExtent(
-    [-20037508.342789244, -20037508.342789244, 20037508.342789244, 20037508.342789244]
+    [1142368, 7447444.4, 4868884.5, 11173960.9]
   );
+  /*ol.proj.get('EPSG:3395').setWorldExtent(
+    [-180, -90, 180, 90]
+  );*/
 
   var useWGS84 = false
   var projection, tileMatrixSet
   if (useWGS84) {
-    tileMatrixSet = 'EPSG:3395_FTA'
-    projection = ol.proj.get('EPSG:3395');
-  } else {
     projection = ol.proj.get('EPSG:4326');
     tileMatrixSet = 'WGS84_Pseudo-Mercator'
+  } else {
+    tileMatrixSet = 'EPSG:3395_FTA'
+    projection = ol.proj.get('EPSG:3395');
   }
 
   var projectionExtent = projection.getExtent();
-  var size = ol.extent.getWidth(projectionExtent) / 256;
+  var tileSize = 256
+  var size = ol.extent.getWidth(projectionExtent) / tileSize;
   var resolutions = new Array(18);
   var matrixIds = new Array(18);
   for (var z = 0; z < 18; ++z) {
@@ -47,15 +51,16 @@
         opacity: 0.7,
         source: new ol.source.WMTS({
           url: 'https://julkinen.liikennevirasto.fi/rasteripalvelu/service/wmts',
-          //layer: 'liikennevirasto:Merikarttasarjojen erikoiskartat public',
-          layer: 'liikennevirasto:Rannikkokartat public',
+          layer: 'liikennevirasto:Merikarttasarjojen erikoiskartat public',
+          //layer: 'liikennevirasto:Rannikkokartat public',
           matrixSet: tileMatrixSet,
           format: 'image/png',
           projection: projection,
           tileGrid: new ol.tilegrid.WMTS({
-            origin: ol.extent.getTopLeft(projectionExtent),
+            extent: projectionExtent,
             resolutions: resolutions,
-            matrixIds: matrixIds
+            matrixIds: matrixIds,
+            tileSize: tileSize
           }),
           style: 'default',
           wrapX: true
@@ -70,7 +75,7 @@
     }),
     view: new ol.View({
       center: [0, 0],
-      zoom: 4
+      zoom: 5
     })
   });
 </script>
