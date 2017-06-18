@@ -52,7 +52,7 @@
         opacity: 0.7
       }),
       getLayer('liikennevirasto:Rannikkokartat public', resolutions[2]),
-      getLayer('liikennevirasto:Merikarttasarjojen erikoiskartat public', resolutions[10])
+      //getLayer('liikennevirasto:Merikarttasarjojen erikoiskartat public', resolutions[10])
     ],
     target: 'map',
     controls: ol.control.defaults({
@@ -67,24 +67,26 @@
   });
 
   function getLayer(layer, maxResolution) {
+    var source = new ol.source.WMTS({
+      url: 'https://julkinen.liikennevirasto.fi/rasteripalvelu/service/wmts',
+      layer: layer,
+      matrixSet: tileMatrixSet,
+      format: 'image/png',
+      projection: projection,
+      tileGrid: new ol.tilegrid.WMTS({
+        extent: projectionExtent,
+        resolutions: resolutions,
+        matrixIds: matrixIds,
+        tileSize: tileSize
+      }),
+      style: 'default',
+      wrapX: true
+    })
+    //source.setRenderReprojectionEdges(true)
     return new ol.layer.Tile({
-      opacity: 1,
-      maxResolution: maxResolution,
-      source: new ol.source.WMTS({
-        url: 'https://julkinen.liikennevirasto.fi/rasteripalvelu/service/wmts',
-        layer: layer,
-        matrixSet: tileMatrixSet,
-        format: 'image/png',
-        projection: projection,
-        tileGrid: new ol.tilegrid.WMTS({
-          extent: projectionExtent,
-          resolutions: resolutions,
-          matrixIds: matrixIds,
-          tileSize: tileSize
-        }),
-        style: 'default',
-        wrapX: true
-      })
+      opacity: 0.5,
+      //maxResolution: maxResolution,
+      source: source
     })
   }
 </script>
